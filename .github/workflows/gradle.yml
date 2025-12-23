@@ -1,0 +1,38 @@
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.3' # 使用一个与Forge更兼容的版本
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew build --stacktrace --no-daemon
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: jar-artifacts
+        path: build/libs/*.jar
+        retention-days: 7
